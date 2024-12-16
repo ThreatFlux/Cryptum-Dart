@@ -1,0 +1,48 @@
+name: Dart CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 'stable'
+          
+      - name: Install dependencies
+        run: dart pub get
+        
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+        
+      - name: Analyze project source
+        run: dart analyze
+        
+      - name: Run tests
+        run: dart test
+
+  publish:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 'stable'
+          
+      - name: Install dependencies
+        run: dart pub get
+        
+      - name: Publish package
+        run: dart pub publish --dry-run
