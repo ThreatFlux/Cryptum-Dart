@@ -1,0 +1,35 @@
+# Files and directories created by pub
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# Directory created by dartdoc
+doc/api/
+
+# IntelliJ/Android Studio
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+.test_coverage.dart
+coverage_badge.svg
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+# Compiled JavaScript files
+*.dart.js
+*.js_
+*.js.deps
+*.js.map
