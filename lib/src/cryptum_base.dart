@@ -221,7 +221,8 @@ class Cryptum {
 
       return topLevelSeq.encodedBytes;
     } catch (e) {
-      throw FormatException('Failed to encode RSA private key: ${e.toString()}');
+      throw FormatException(
+          'Failed to encode RSA private key: ${e.toString()}');
     }
   }
 
@@ -309,13 +310,17 @@ class Cryptum {
       final p = pElement.valueAsBigInteger;
       final q = qElement.valueAsBigInteger;
 
-      if (modulus == null || privateExponent == null || p == null || q == null) {
+      if (modulus == null ||
+          privateExponent == null ||
+          p == null ||
+          q == null) {
         throw FormatException('Invalid RSA private key parameters');
       }
 
       return RSAPrivateKey(modulus, privateExponent, p, q);
     } catch (e) {
-      throw FormatException('Failed to decode RSA private key: ${e.toString()}');
+      throw FormatException(
+          'Failed to decode RSA private key: ${e.toString()}');
     }
   }
 }

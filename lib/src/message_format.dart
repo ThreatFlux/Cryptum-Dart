@@ -125,7 +125,7 @@ class MessageFormat {
     for (var i = 0; i < componentOrder.length; i++) {
       final component = componentOrder[i];
       buffer.add(components[component]!);
-      
+
       // Add padding for all components
       final padSize = paddingSizes[component] ?? 0;
       if (padSize > 0) {
@@ -154,7 +154,7 @@ class MessageFormat {
         totalFixedSize += size;
         print('Adding fixed size for $component: $size');
       }
-      
+
       // Add padding size for all components
       final padding = paddingSizes[component] ?? 0;
       totalPaddingSize += padding;
@@ -191,7 +191,8 @@ class MessageFormat {
       final padding = paddingSizes[component] ?? 0;
       if (padding > 0) {
         if (position + padding > message.length) {
-          throw FormatException('Message too short for padding after $component');
+          throw FormatException(
+              'Message too short for padding after $component');
         }
         position += padding;
         print('Added padding $padding, new position: $position');
