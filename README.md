@@ -1,5 +1,6 @@
 # Cryptum-Dart
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e51d9ddd38344efb882818c277e5f633)](https://app.codacy.com/gh/ThreatFlux/Cryptum-Dart?utm_source=github.com&utm_medium=referral&utm_content=ThreatFlux/Cryptum-Dart&utm_campaign=Badge_Grade)
 [![Dart CI/CD](https://github.com/threatflux/Cryptum-Dart/actions/workflows/dart.yml/badge.svg)](https://github.com/threatflux/Cryptum-Dart/actions/workflows/dart.yml)
 [![codecov](https://codecov.io/gh/threatflux/Cryptum-Dart/branch/main/graph/badge.svg)](https://codecov.io/gh/threatflux/Cryptum-Dart)
 [![pub package](https://img.shields.io/pub/v/cryptum_dart.svg)](https://pub.dev/packages/cryptum_dart)
