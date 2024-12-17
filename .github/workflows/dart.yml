@@ -57,8 +57,8 @@ jobs:
     
     - name: Setup pub.dev credentials
       run: |
-        mkdir -p $HOME/.config/dart
-        echo '${{ secrets.PUB_DEV_CREDENTIALS }}' > $HOME/.config/dart/pub-credentials.json
+        mkdir -p ~/.pub-cache
+        echo '${{ secrets.PUB_CREDENTIALS }}' > ~/.pub-cache/credentials.json
     
     - name: Publish to pub.dev
       run: dart pub publish --force
