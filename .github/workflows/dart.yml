@@ -15,6 +15,8 @@ jobs:
     
     - name: Setup Dart
       uses: dart-lang/setup-dart@v1
+      with:
+        sdk: '3.6.0'
       
     - name: Install dependencies
       run: dart pub get
@@ -29,7 +31,7 @@ jobs:
       run: |
         dart pub global activate coverage
         dart test --coverage=coverage
-        dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
+        dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --report-on=lib
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -48,6 +50,8 @@ jobs:
     
     - name: Setup Dart
       uses: dart-lang/setup-dart@v1
+      with:
+        sdk: '3.6.0'
     
     - name: Install dependencies
       run: dart pub get

@@ -121,22 +121,6 @@ class MessageFormat {
     final buffer = BytesBuilder();
     final random = Random.secure();
 
-    // Calculate total size and validate
-    var totalSize = 0;
-    for (var i = 0; i < componentOrder.length; i++) {
-      final component = componentOrder[i];
-      final size = COMPONENTS[component]!;
-      if (size != -1) {
-        totalSize += size;
-      } else if (component == 'data') {
-        totalSize += data.length;
-      }
-      
-      // Add padding size for all components
-      final padSize = paddingSizes[component] ?? 0;
-      totalSize += padSize;
-    }
-
     // Now build the message
     for (var i = 0; i < componentOrder.length; i++) {
       final component = componentOrder[i];
@@ -163,10 +147,8 @@ class MessageFormat {
     // Calculate total fixed size and data size
     var totalFixedSize = 0;
     var totalPaddingSize = 0;
-    var dataIndex = componentOrder.indexOf('data');
 
-    for (var i = 0; i < componentOrder.length; i++) {
-      final component = componentOrder[i];
+    for (final component in componentOrder) {
       final size = COMPONENTS[component]!;
       if (size != -1) {
         totalFixedSize += size;
@@ -191,8 +173,7 @@ class MessageFormat {
     }
 
     // Process components
-    for (var i = 0; i < componentOrder.length; i++) {
-      final component = componentOrder[i];
+    for (final component in componentOrder) {
       print('Processing component $component at position $position');
 
       // Extract component
@@ -200,15 +181,6 @@ class MessageFormat {
       if (position + size > message.length) {
         throw FormatException(
             'Message too short for component $component (need ${position + size} bytes, have ${message.length})');
-      }
-
-      // Verify component integrity
-      if (component == 'tag' && i == componentOrder.length - 1) {
-        // For the tag component, verify it hasn't been tampered with
-        final expectedLength = TAG_SIZE;
-        if (size != expectedLength) {
-          throw FormatException('Tag component size mismatch');
-        }
       }
 
       components[component] = message.sublist(position, position + size);
