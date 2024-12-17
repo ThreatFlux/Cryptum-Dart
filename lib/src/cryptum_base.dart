@@ -186,7 +186,7 @@ class Cryptum {
 
   Uint8List _encodeRSAPrivateKeyPKCS8(RSAPrivateKey key) {
     try {
-      // Extract and validate key components
+      // Extract key components
       final n = key.n;
       final publicExponent = key.publicExponent;
       final privateExponent = key.privateExponent;
@@ -228,7 +228,7 @@ class Cryptum {
 
   Uint8List _encodeRSAPublicKeyX509(RSAPublicKey key) {
     try {
-      // Extract and validate key components
+      // Extract key components
       final n = key.n;
       final publicExponent = key.publicExponent;
 
@@ -310,14 +310,12 @@ class Cryptum {
       final p = pElement.valueAsBigInteger;
       final q = qElement.valueAsBigInteger;
 
-      if (modulus == null ||
-          privateExponent == null ||
-          p == null ||
-          q == null) {
+      // Since these values are non-nullable, we only need to validate they exist
+      if ([modulus, privateExponent, p, q].any((e) => e == null)) {
         throw FormatException('Invalid RSA private key parameters');
       }
 
-      return RSAPrivateKey(modulus, privateExponent, p, q);
+      return RSAPrivateKey(modulus!, privateExponent!, p!, q!);
     } catch (e) {
       throw FormatException(
           'Failed to decode RSA private key: ${e.toString()}');
