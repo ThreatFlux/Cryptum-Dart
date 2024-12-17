@@ -142,17 +142,24 @@ class Cryptum {
       // Decrypt session key
       final privateKeyBytes = base64Url.decode(privateKeyString);
       final privateKey = _decodeRSAPrivateKeyPKCS8(privateKeyBytes);
+
+      // Create a basic RSA engine first
       final rsaEngine = RSAEngine()
         ..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
 
-      final rsaDecrypter = OAEPEncoding(rsaEngine)
+      // Create OAEP with SHA-1 and MGF1 padding (standard for OAEP)
+      final rsaDecrypter = OAEPEncoding.withSHA1(rsaEngine)
         ..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
 
-      final sessionKey = rsaDecrypter.process(encSessionKey).sublist(0, 32);
+      final sessionKey = rsaDecrypter.process(encSessionKey);
 
       // GCM setup
-      final params =
-          AEADParameters(KeyParameter(sessionKey), 128, nonce, Uint8List(0));
+      final params = AEADParameters(
+        KeyParameter(sessionKey),
+        128,
+        nonce,
+        Uint8List(0),
+      );
 
       final cipher = GCMBlockCipher(AESEngine())..init(false, params);
 
@@ -247,10 +254,6 @@ class Cryptum {
       // Verify algorithm identifier
       final algorithmSeq = topLevelSeq.elements[0] as ASN1Sequence;
       final algorithmOid = algorithmSeq.elements[0] as ASN1ObjectIdentifier;
-      final rsaEncryption = '1.2.840.113549.1.1.1';
-      if (algorithmOid.identifier != rsaEncryption) {
-        throw FormatException('Unsupported public key algorithm');
-      }
 
       // Extract the public key bit string
       final publicKeyBitString = topLevelSeq.elements[1] as ASN1BitString;
@@ -286,14 +289,6 @@ class Cryptum {
           (topLevelSeq.elements[0] as ASN1Integer).valueAsBigInteger;
       if (version != BigInt.zero) {
         throw FormatException('Unsupported PKCS8 version');
-      }
-
-      // Verify algorithm identifier
-      final algorithmSeq = topLevelSeq.elements[1] as ASN1Sequence;
-      final algorithmOid = algorithmSeq.elements[0] as ASN1ObjectIdentifier;
-      final rsaEncryption = '1.2.840.113549.1.1.1';
-      if (algorithmOid.identifier != rsaEncryption) {
-        throw FormatException('Unsupported private key algorithm');
       }
 
       // Extract the private key bytes

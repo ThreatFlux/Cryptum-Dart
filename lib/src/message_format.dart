@@ -198,15 +198,38 @@ class MessageFormat {
     return components;
   }
 
-  // Helper to find next component position accounting for padding
+  // Helper to find next component position accounting for padding and variable sizes
   int _findNextComponentPosition(
       Uint8List message, int currentPos, int currentIdx) {
-    var pos = currentPos;
-    // Skip current component (if fixed size) and padding
-    if (COMPONENTS[componentOrder[currentIdx]] != -1) {
-      pos += COMPONENTS[componentOrder[currentIdx]]!;
+    // Find the next fixed-size component
+    var nextFixedIdx = currentIdx + 1;
+    var totalSize = 0;
+
+    while (nextFixedIdx < componentOrder.length) {
+      final nextComponent = componentOrder[nextFixedIdx];
+      if (COMPONENTS[nextComponent] != -1) {
+        // Found next fixed component
+        break;
+      }
+      nextFixedIdx++;
     }
-    pos += paddingSizes[componentOrder[currentIdx]] ?? 0;
-    return pos;
+
+    if (nextFixedIdx >= componentOrder.length) {
+      // No more fixed components, use remaining message length
+      return message.length - currentPos;
+    }
+
+    // Calculate total size by working backwards from next fixed component
+    var pos = message.length;
+    for (var i = componentOrder.length - 1; i >= nextFixedIdx; i--) {
+      final component = componentOrder[i];
+      final size = COMPONENTS[component] ?? 0;
+      pos -= size;
+      if (i > 0) {
+        pos -= paddingSizes[componentOrder[i - 1]] ?? 0;
+      }
+    }
+
+    return pos - currentPos;
   }
 }
