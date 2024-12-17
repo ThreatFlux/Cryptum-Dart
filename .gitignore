@@ -7,29 +7,29 @@ pubspec.lock
 # Directory created by dartdoc
 doc/api/
 
-# IntelliJ/Android Studio
-.idea/
-*.iml
-
-# VS Code
-.vscode/
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Test coverage
+# Coverage reports
 coverage/
 .test_coverage.dart
-coverage_badge.svg
+lcov.info
 
-# Temporary files
-*.swp
-*.swo
-*~
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
 
-# Compiled JavaScript files
-*.dart.js
-*.js_
-*.js.deps
-*.js.map
+# VS Code related
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

@@ -1,4 +1,4 @@
-name: Dart CI
+name: Dart CI/CD
 
 on:
   push:
@@ -11,23 +11,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+    
+    - name: Setup Dart
+      uses: dart-lang/setup-dart@v1
       
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: 'stable'
-          
-      - name: Install dependencies
-        run: dart pub get
+    - name: Install dependencies
+      run: dart pub get
+      
+    - name: Verify formatting
+      run: dart format --output=none --set-exit-if-changed .
+      
+    - name: Analyze project source
+      run: dart analyze
+      
+    - name: Run tests with coverage
+      run: |
+        dart pub global activate coverage
+        dart test --coverage=coverage
+        dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
         
-      - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
-        
-      - name: Analyze project source
-        run: dart analyze
-        
-      - name: Run tests
-        run: dart test
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: coverage/lcov.info
+        fail_ci_if_error: true
 
   publish:
     needs: build
@@ -35,14 +44,18 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
-      
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: 'stable'
-          
-      - name: Install dependencies
-        run: dart pub get
-        
-      - name: Publish package
-        run: dart pub publish --dry-run
+    - uses: actions/checkout@v3
+    
+    - name: Setup Dart
+      uses: dart-lang/setup-dart@v1
+    
+    - name: Install dependencies
+      run: dart pub get
+    
+    - name: Setup pub.dev credentials
+      run: |
+        mkdir -p $HOME/.config/dart
+        echo '${{ secrets.PUB_DEV_CREDENTIALS }}' > $HOME/.config/dart/pub-credentials.json
+    
+    - name: Publish to pub.dev
+      run: dart pub publish --force

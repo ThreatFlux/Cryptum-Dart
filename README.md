@@ -1,5 +1,8 @@
 # Cryptum-Dart
 
+[![Dart CI/CD](https://github.com/threatflux/Cryptum-Dart/actions/workflows/dart.yml/badge.svg)](https://github.com/threatflux/Cryptum-Dart/actions/workflows/dart.yml)
+[![codecov](https://codecov.io/gh/threatflux/Cryptum-Dart/branch/main/graph/badge.svg)](https://codecov.io/gh/threatflux/Cryptum-Dart)
+[![pub package](https://img.shields.io/pub/v/cryptum_dart.svg)](https://pub.dev/packages/cryptum_dart)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Dart 2.19+](https://img.shields.io/badge/dart-2.19+-blue.svg)](https://dart.dev/get-dart)
 [![Code style: lint](https://img.shields.io/badge/style-lint-4BC0F5.svg)](https://pub.dev/packages/lint)
@@ -111,7 +114,7 @@ dart test
 # Run all tests
 dart test
 
-# Run with coverage (requires lcov)
+# Run with coverage
 dart test --coverage=coverage
 ```
 
@@ -120,6 +123,15 @@ dart test --coverage=coverage
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
+
+## CI/CD
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+- Automated testing on each push and pull request
+- Code coverage reporting via Codecov
+- Automatic publishing to pub.dev when tests pass
+- Code formatting and analysis checks
 
 ## License
 
