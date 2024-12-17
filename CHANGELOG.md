@@ -1,3 +1,12 @@
+## 0.0.3
+Version tagging 
+
+## 0.0.2
+CI/CD implementation 
+- GitHub Actions linter fix
+- Added codecov
+- Update unit tests
+
 ## 0.0.1
 
 Initial release of Cryptum-Dart featuring:
