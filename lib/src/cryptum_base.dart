@@ -186,19 +186,12 @@ class Cryptum {
 
   Uint8List _encodeRSAPrivateKeyPKCS8(RSAPrivateKey key) {
     try {
-      final n = key.n;
-      final publicExponent = key.publicExponent;
-      final privateExponent = key.privateExponent;
-      final p = key.p;
-      final q = key.q;
-
-      if (n == null ||
-          publicExponent == null ||
-          privateExponent == null ||
-          p == null ||
-          q == null) {
-        throw FormatException('Invalid RSA private key: null components');
-      }
+      // Extract key components
+      final n = key.n ?? (throw FormatException('RSA modulus is null'));
+      final publicExponent = key.publicExponent ?? (throw FormatException('Public exponent is null'));
+      final privateExponent = key.privateExponent ?? (throw FormatException('Private exponent is null'));
+      final p = key.p ?? (throw FormatException('Prime p is null'));
+      final q = key.q ?? (throw FormatException('Prime q is null'));
 
       var version = ASN1Integer(BigInt.zero);
       var algorithm = ASN1Sequence()
@@ -230,12 +223,9 @@ class Cryptum {
 
   Uint8List _encodeRSAPublicKeyX509(RSAPublicKey key) {
     try {
-      final n = key.n;
-      final publicExponent = key.publicExponent;
-
-      if (n == null || publicExponent == null) {
-        throw FormatException('Invalid RSA public key: null components');
-      }
+      // Extract key components
+      final n = key.n ?? (throw FormatException('RSA modulus is null'));
+      final publicExponent = key.publicExponent ?? (throw FormatException('Public exponent is null'));
 
       var algorithm = ASN1Sequence()
         ..add(ASN1ObjectIdentifier([1, 2, 840, 113549, 1, 1, 1]))
@@ -266,12 +256,8 @@ class Cryptum {
       final modulusElement = publicKeySeq.elements[0] as ASN1Integer;
       final exponentElement = publicKeySeq.elements[1] as ASN1Integer;
 
-      final modulus = modulusElement.valueAsBigInteger;
-      final exponent = exponentElement.valueAsBigInteger;
-
-      if (modulus == null || exponent == null) {
-        throw FormatException('Invalid RSA public key parameters');
-      }
+      final modulus = modulusElement.valueAsBigInteger ?? (throw FormatException('Invalid modulus'));
+      final exponent = exponentElement.valueAsBigInteger ?? (throw FormatException('Invalid exponent'));
 
       return RSAPublicKey(modulus, exponent);
     } catch (e) {
@@ -285,7 +271,8 @@ class Cryptum {
       final topLevelSeq = asn1Parser.nextObject() as ASN1Sequence;
       final versionElement = topLevelSeq.elements[0] as ASN1Integer;
 
-      if (versionElement.valueAsBigInteger != BigInt.zero) {
+      final version = versionElement.valueAsBigInteger ?? (throw FormatException('Invalid version'));
+      if (version != BigInt.zero) {
         throw FormatException('Unsupported PKCS8 version');
       }
 
@@ -294,7 +281,8 @@ class Cryptum {
       final privateKeySeq = privateKeyAsn.nextObject() as ASN1Sequence;
       final keyVersionElement = privateKeySeq.elements[0] as ASN1Integer;
 
-      if (keyVersionElement.valueAsBigInteger != BigInt.zero) {
+      final keyVersion = keyVersionElement.valueAsBigInteger ?? (throw FormatException('Invalid key version'));
+      if (keyVersion != BigInt.zero) {
         throw FormatException('Unsupported RSA private key version');
       }
 
@@ -303,17 +291,10 @@ class Cryptum {
       final pElement = privateKeySeq.elements[4] as ASN1Integer;
       final qElement = privateKeySeq.elements[5] as ASN1Integer;
 
-      final modulus = modulusElement.valueAsBigInteger;
-      final privateExponent = privateExponentElement.valueAsBigInteger;
-      final p = pElement.valueAsBigInteger;
-      final q = qElement.valueAsBigInteger;
-
-      if (modulus == null ||
-          privateExponent == null ||
-          p == null ||
-          q == null) {
-        throw FormatException('Invalid RSA private key parameters');
-      }
+      final modulus = modulusElement.valueAsBigInteger ?? (throw FormatException('Invalid modulus'));
+      final privateExponent = privateExponentElement.valueAsBigInteger ?? (throw FormatException('Invalid private exponent'));
+      final p = pElement.valueAsBigInteger ?? (throw FormatException('Invalid prime p'));
+      final q = qElement.valueAsBigInteger ?? (throw FormatException('Invalid prime q'));
 
       return RSAPrivateKey(modulus, privateExponent, p, q);
     } catch (e) {

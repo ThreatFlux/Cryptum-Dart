@@ -97,7 +97,6 @@ void main() {
 
     test('requires format', () async {
       final keys = await cryptum.generateKey();
-      final testData = Uint8List.fromList(utf8.encode('Test Message'));
 
       // Create a new Cryptum instance (no format set yet)
       final freshCryptum = Cryptum();
@@ -156,8 +155,6 @@ void main() {
     test('detects tampered data', () async {
       final keys = await cryptum.generateKey();
       final testData = Uint8List.fromList(utf8.encode('Test Message'));
-      
-      // Use a fixed format where tag is not the last component
       final format = MessageFormat(
         componentOrder: ['tag', 'data', 'nonce', 'rsaBlock'],
         paddingSizes: {
@@ -171,12 +168,8 @@ void main() {
       final encrypted =
           await cryptum.encryptBlob(testData, keys['public']!, format: format);
 
-      // Extract components to find tag position
-      final components = format.extractComponents(encrypted);
-      
-      // Tamper with the tag component
-      final tagStart = 0; // Since tag is first in our fixed format
-      encrypted[tagStart] ^= 1; // Modify first byte of tag
+      // Tamper with the tag component (first component in our format)
+      encrypted[0] ^= 1;
 
       expect(
           () =>
