@@ -1,6 +1,6 @@
 name: cryptum_dart
 description: A Dart port of the Cryptum encryption library providing hybrid RSA/AES-GCM encryption with secure session key handling and dynamic format negotiation.
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/threatflux/Cryptum-Dart
 repository: https://github.com/threatflux/Cryptum-Dart
 issue_tracker: https://github.com/threatflux/Cryptum-Dart/issues

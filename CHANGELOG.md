@@ -1,3 +1,8 @@
+## 0.0.4
+Documentation updates
+- Added comprehensive example documentation
+- Enhanced package documentation for pub.dev publishing
+
 ## 0.0.3
 Version tagging 
 

@@ -6,6 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Dart 2.19+](https://img.shields.io/badge/dart-2.19+-blue.svg)](https://dart.dev/get-dart)
 [![Code style: lint](https://img.shields.io/badge/style-lint-4BC0F5.svg)](https://pub.dev/packages/lint)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/56182ee268e540cb8e5529785191531f)](https://app.codacy.com/gh/ThreatFlux/Cryptum-Dart/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 A Dart port of the Cryptum encryption library providing hybrid RSA/AES-GCM encryption with secure session key handling and dynamic format negotiation.
 
