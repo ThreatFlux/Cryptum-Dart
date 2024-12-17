@@ -56,7 +56,7 @@ class Cryptum {
       final publicKeyBytes = base64Url.decode(publicKeyString);
       final publicKey = _decodeRSAPublicKeyX509(publicKeyBytes);
 
-      // Setup RSA OAEP
+      // Setup RSA OAEP with SHA-1 and MGF1
       final rsaEngine = RSAEngine()
         ..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
 
@@ -137,18 +137,17 @@ class Cryptum {
       final encSessionKey = components['rsaBlock']!;
       final nonce = components['nonce']!;
       final cipherText = components['data']!;
-      final tag = components['tag']!;
+      final expectedTag = components['tag']!;
 
       // Decrypt session key
       final privateKeyBytes = base64Url.decode(privateKeyString);
       final privateKey = _decodeRSAPrivateKeyPKCS8(privateKeyBytes);
 
-      // Create a basic RSA engine first
+      // Setup RSA OAEP with SHA-1 and MGF1
       final rsaEngine = RSAEngine()
         ..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
 
-      // Create OAEP with SHA-1 and MGF1 padding (standard for OAEP)
-      final rsaDecrypter = OAEPEncoding.withSHA1(rsaEngine)
+      final rsaDecrypter = OAEPEncoding(rsaEngine)
         ..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
 
       final sessionKey = rsaDecrypter.process(encSessionKey);
@@ -163,12 +162,13 @@ class Cryptum {
 
       final cipher = GCMBlockCipher(AESEngine())..init(false, params);
 
-      // Decrypt data
+      // Process data
       final plainText = cipher.process(cipherText);
 
-      // Verify MAC
-      if (!_compareUint8Lists(tag, cipher.mac)) {
-        throw Exception('Authentication failed');
+      // Verify MAC - Important: Do this BEFORE returning the plaintext
+      // Use constant-time comparison to prevent timing attacks
+      if (!_compareUint8Lists(expectedTag, cipher.mac)) {
+        throw Exception('Message authentication failed - data may be tampered');
       }
 
       return plainText;
@@ -177,6 +177,7 @@ class Cryptum {
     }
   }
 
+  // Constant-time comparison to prevent timing attacks
   bool _compareUint8Lists(Uint8List a, Uint8List b) {
     if (a.length != b.length) return false;
     var result = 0;
@@ -188,18 +189,13 @@ class Cryptum {
 
   Uint8List _encodeRSAPrivateKeyPKCS8(RSAPrivateKey key) {
     try {
-      // Version for private key info structure
       var version = ASN1Integer(BigInt.zero);
-
-      // Algorithm identifier
       var algorithm = ASN1Sequence()
-        ..add(
-            ASN1ObjectIdentifier([1, 2, 840, 113549, 1, 1, 1])) // rsaEncryption
+        ..add(ASN1ObjectIdentifier([1, 2, 840, 113549, 1, 1, 1]))
         ..add(ASN1Null());
 
-      // RSA private key structure
       var privateKeyContent = ASN1Sequence()
-        ..add(ASN1Integer(BigInt.zero)) // Version for RSA private key structure
+        ..add(ASN1Integer(BigInt.zero))
         ..add(ASN1Integer(key.n!))
         ..add(ASN1Integer(key.publicExponent!))
         ..add(ASN1Integer(key.privateExponent!))
@@ -209,7 +205,6 @@ class Cryptum {
         ..add(ASN1Integer(key.privateExponent! % (key.q! - BigInt.one)))
         ..add(ASN1Integer(key.q!.modInverse(key.p!)));
 
-      // Wrap everything in the PrivateKeyInfo structure
       var topLevelSeq = ASN1Sequence()
         ..add(version)
         ..add(algorithm)
@@ -224,18 +219,14 @@ class Cryptum {
 
   Uint8List _encodeRSAPublicKeyX509(RSAPublicKey key) {
     try {
-      // Algorithm identifier
       var algorithmSeq = ASN1Sequence()
-        ..add(
-            ASN1ObjectIdentifier([1, 2, 840, 113549, 1, 1, 1])) // rsaEncryption
+        ..add(ASN1ObjectIdentifier([1, 2, 840, 113549, 1, 1, 1]))
         ..add(ASN1Null());
 
-      // RSA public key structure
       var publicKeySeq = ASN1Sequence()
         ..add(ASN1Integer(key.n!))
         ..add(ASN1Integer(key.publicExponent!));
 
-      // Wrap in SubjectPublicKeyInfo structure
       var topLevelSeq = ASN1Sequence()
         ..add(algorithmSeq)
         ..add(ASN1BitString(publicKeySeq.encodedBytes));
@@ -250,17 +241,11 @@ class Cryptum {
     try {
       final asn1Parser = ASN1Parser(bytes);
       final topLevelSeq = asn1Parser.nextObject() as ASN1Sequence;
-
-      // Verify algorithm identifier
       final algorithmSeq = topLevelSeq.elements[0] as ASN1Sequence;
-      final algorithmOid = algorithmSeq.elements[0] as ASN1ObjectIdentifier;
-
-      // Extract the public key bit string
       final publicKeyBitString = topLevelSeq.elements[1] as ASN1BitString;
       final publicKeyAsn = ASN1Parser(publicKeyBitString.contentBytes());
       final publicKeySeq = publicKeyAsn.nextObject() as ASN1Sequence;
 
-      // Get the key components
       final modulus =
           (publicKeySeq.elements[0] as ASN1Integer).valueAsBigInteger;
       final exponent =
@@ -284,26 +269,20 @@ class Cryptum {
       final asn1Parser = ASN1Parser(bytes);
       final topLevelSeq = asn1Parser.nextObject() as ASN1Sequence;
 
-      // Check version
-      final version =
-          (topLevelSeq.elements[0] as ASN1Integer).valueAsBigInteger;
-      if (version != BigInt.zero) {
+      if ((topLevelSeq.elements[0] as ASN1Integer).valueAsBigInteger !=
+          BigInt.zero) {
         throw FormatException('Unsupported PKCS8 version');
       }
 
-      // Extract the private key bytes
       final privateKeyOctetString = topLevelSeq.elements[2] as ASN1OctetString;
       final privateKeyAsn = ASN1Parser(privateKeyOctetString.contentBytes());
       final privateKeySeq = privateKeyAsn.nextObject() as ASN1Sequence;
 
-      // Check RSA private key version
-      final rsaVersion =
-          (privateKeySeq.elements[0] as ASN1Integer).valueAsBigInteger;
-      if (rsaVersion != BigInt.zero) {
+      if ((privateKeySeq.elements[0] as ASN1Integer).valueAsBigInteger !=
+          BigInt.zero) {
         throw FormatException('Unsupported RSA private key version');
       }
 
-      // Extract key components
       final modulus =
           (privateKeySeq.elements[1] as ASN1Integer).valueAsBigInteger!;
       final privateExponent =
@@ -311,7 +290,6 @@ class Cryptum {
       final p = (privateKeySeq.elements[4] as ASN1Integer).valueAsBigInteger!;
       final q = (privateKeySeq.elements[5] as ASN1Integer).valueAsBigInteger!;
 
-      // Validate key components
       if (modulus == BigInt.zero ||
           privateExponent == BigInt.zero ||
           p == BigInt.zero ||

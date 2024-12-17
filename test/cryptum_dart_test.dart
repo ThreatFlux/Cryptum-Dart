@@ -156,13 +156,27 @@ void main() {
     test('detects tampered data', () async {
       final keys = await cryptum.generateKey();
       final testData = Uint8List.fromList(utf8.encode('Test Message'));
-      final format = MessageFormat.generateRandom();
+      
+      // Use a fixed format where tag is not the last component
+      final format = MessageFormat(
+        componentOrder: ['tag', 'data', 'nonce', 'rsaBlock'],
+        paddingSizes: {
+          'tag': 8,
+          'data': 12,
+          'nonce': 16,
+          'rsaBlock': 20,
+        },
+      );
 
       final encrypted =
           await cryptum.encryptBlob(testData, keys['public']!, format: format);
 
-      // Tamper with the encrypted data
-      encrypted[encrypted.length - 1] ^= 1;
+      // Extract components to find tag position
+      final components = format.extractComponents(encrypted);
+      
+      // Tamper with the tag component
+      final tagStart = 0; // Since tag is first in our fixed format
+      encrypted[tagStart] ^= 1; // Modify first byte of tag
 
       expect(
           () =>
