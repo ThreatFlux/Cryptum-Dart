@@ -18,7 +18,8 @@ class CryptoOperations {
   }
 
   /// Prepares encryption components using a public key
-  static Future<Map<String, dynamic>> prepareEncryption(String publicKeyString) async {
+  static Future<Map<String, dynamic>> prepareEncryption(
+      String publicKeyString) async {
     try {
       // Generate 32-byte AES session key
       final sessionKey = Uint8List.fromList(
@@ -53,10 +54,8 @@ class CryptoOperations {
   }
 
   /// Encrypts data using RSA-OAEP and AES-GCM
-  static Future<Uint8List> encryptBlob(
-      Uint8List rawData,
-      String publicKeyString,
-      MessageFormat messageFormat) async {
+  static Future<Uint8List> encryptBlob(Uint8List rawData,
+      String publicKeyString, MessageFormat messageFormat) async {
     try {
       // Prepare encryption components
       final prep = await prepareEncryption(publicKeyString);
@@ -95,10 +94,8 @@ class CryptoOperations {
   }
 
   /// Decrypts data using RSA-OAEP and AES-GCM
-  static Future<Uint8List> decryptBlob(
-      Uint8List encryptedData,
-      String privateKeyString,
-      MessageFormat messageFormat) async {
+  static Future<Uint8List> decryptBlob(Uint8List encryptedData,
+      String privateKeyString, MessageFormat messageFormat) async {
     try {
       // Extract components using format
       final components = messageFormat.extractComponents(encryptedData);

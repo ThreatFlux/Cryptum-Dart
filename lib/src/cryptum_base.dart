@@ -51,18 +51,16 @@ class Cryptum {
   }
 
   /// Encrypts data using RSA-OAEP and AES-GCM
-  Future<Uint8List> encryptBlob(
-      Uint8List rawData,
-      String publicKeyString,
+  Future<Uint8List> encryptBlob(Uint8List rawData, String publicKeyString,
       {MessageFormat? format}) async {
     final messageFormat = format ?? getFormat();
-    return CryptoOperations.encryptBlob(rawData, publicKeyString, messageFormat);
+    return CryptoOperations.encryptBlob(
+        rawData, publicKeyString, messageFormat);
   }
 
   /// Decrypts data using RSA-OAEP and AES-GCM
   Future<Uint8List> decryptBlob(
-      Uint8List encryptedData,
-      String privateKeyString,
+      Uint8List encryptedData, String privateKeyString,
       {MessageFormat? format}) async {
     final messageFormat = format ?? _currentFormat;
     if (messageFormat == null) {
